@@ -1,35 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// App.tsx または Layout.tsx 内
 
-function App() {
-  const [count, setCount] = useState(0)
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './layouts/Layout';
+import Home from './pages/HomePage';
+import About from './pages/AboutPage';
+import Contact from './pages/ContactPage';
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+interface GitHubProfileData {
+  avatar_url: string;
+  login: string;
 }
 
-export default App
+const GitHubProfileContext = createContext<GitHubProfileData | null>(null);
+
+type GitHubProfileProviderProps = {
+  children: React.ReactNode;
+};
+
+const GitHubProfileProvider: React.FC<GitHubProfileProviderProps> = ({ children }) => {
+  const [profile, setProfile] = useState<GitHubProfileData | null>(null);
+
+  useEffect(() => {
+    if (!profile) {
+      fetch('https://api.github.com/users/shun01290')
+        .then(response => response.json())
+        .then((data: GitHubProfileData) => setProfile(data));
+    }
+  }, [profile]);
+
+  return (
+    <GitHubProfileContext.Provider value={profile}>
+      {children}
+    </GitHubProfileContext.Provider>
+  );
+};
+
+export const useGitHubProfile = () => useContext(GitHubProfileContext);
+
+function App() {
+  return (
+    <GitHubProfileProvider>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path='/' element={<Home />} />
+            <Route path='/about' element={<About />} />
+            <Route path='/contact' element={<Contact />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </GitHubProfileProvider>
+  );
+}
+
+export default App;
