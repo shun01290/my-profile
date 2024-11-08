@@ -1,5 +1,3 @@
-// App.tsx または Layout.tsx 内
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './layouts/Layout';
@@ -20,14 +18,49 @@ type GitHubProfileProviderProps = {
 
 const GitHubProfileProvider: React.FC<GitHubProfileProviderProps> = ({ children }) => {
   const [profile, setProfile] = useState<GitHubProfileData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!profile) {
-      fetch('https://api.github.com/users/shun01290')
-        .then(response => response.json())
-        .then((data: GitHubProfileData) => setProfile(data));
+    // 環境変数からGitHubのアクセストークンを取得
+    const token = import.meta.env.VITE_GITHUB_ACCESS_TOKEN;
+
+    if (!token) {
+      setError('GitHubアクセストークンが設定されていません。');
+      setLoading(false);
+      return;
     }
-  }, [profile]);
+
+    // GitHubのプロフィール情報を取得
+    fetch('https://api.github.com/users/shun01290', {
+      headers: {
+        Authorization: `token ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data: GitHubProfileData) => {
+        setProfile(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch GitHub profile data:', error);
+        setError(error.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <GitHubProfileContext.Provider value={profile}>
@@ -44,9 +77,9 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/about' element={<About />} />
-            <Route path='/contact' element={<Contact />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </Layout>
       </BrowserRouter>

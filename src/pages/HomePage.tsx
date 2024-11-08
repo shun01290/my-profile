@@ -2,6 +2,7 @@ import React from 'react';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { Skeleton } from '@mui/material';
 import { useGitHubProfile } from '../App';
+import { Helmet } from 'react-helmet';
 
 const HomePage: React.FC = () => {
   const profile = useGitHubProfile();
@@ -20,13 +21,16 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <section className='flex flex-col items-center'>
-      <img className='w-[250px] border-[12px] border-white rounded-full shadow-lg' src={profile.avatar_url} alt='' />
-      <h2 className='mt-4 text-lg font-bold'>{profile.login}</h2>
-      <h2 className='text-xl font-bold'>フロントエンドエンジニア</h2>
-      <p className='mt-8 text-base'>UI/UXを意識したデザインを学びながら、セマンティックマークアップを取り入れたサイト制作をジャンルを問わず行っています。<br />また、Pythonを使ってルーチンワークの自動化もしています。</p>
-      <a href='https://github.com/shun01290' target='_blank' rel='noopener noreferrer' className='w-fit inline-flex mt-4 px-2 py-1 bg-neutral-700 text-white shadow-md hover:bg-neutral-600'><GitHubIcon className='mr-1' />Github</a>
-    </section>
+    <>
+      <Helmet><title>Home</title></Helmet>
+      <section className='flex flex-col items-center'>
+        <img className='w-[250px] border-[12px] border-white rounded-full shadow-lg' src={profile.avatar_url} alt='' />
+        <h2 className='mt-4 text-lg font-bold'>{profile.login}</h2>
+        <h2 className='text-xl font-bold'>フロントエンドエンジニア</h2>
+        <p className='mt-8 text-base'>UI/UXを意識したデザインを学びながら、セマンティックマークアップを取り入れたサイト制作をジャンルを問わず行っています。<br />また、Pythonを使ってルーチンワークの自動化もしています。</p>
+        <a href='https://github.com/shun01290' target='_blank' rel='noopener noreferrer' className='w-fit inline-flex mt-4 px-2 py-1 bg-neutral-700 text-white shadow-md hover:bg-neutral-600'><GitHubIcon className='mr-1' />Github</a>
+      </section>
+    </>
   )
 };
 
